@@ -1,15 +1,25 @@
-import express from 'express';
-import { PORT } from './config.js';
-import gymRoutes from './routes/gym.routes.js';
+import express from "express";
+
+import { PORT } from "./config.js";
+import { sequelize } from "./db.js";
+import gymClassRoutes from "./routes/gymClass.routes.js";
 
 const app = express();
 
-try{
-app.listen(PORT);
-app.use(gymRoutes);
-await ...
-console.log(`Server listening on ${PORT}`);
-}
-catch (error) {
-    console.error('There was an error on initialization');
+try {
+  app.use(express.json());
+  app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "*");
+    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+    next();
+  });
+  app.listen(PORT);
+  app.use(gymClassRoutes);
+
+  await sequelize.sync();
+
+  console.log(`Server listening in port: ${PORT} `);
+} catch (error) {
+  console.log("There was an error on initialization");
 }
