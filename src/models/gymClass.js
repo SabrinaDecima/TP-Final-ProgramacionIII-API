@@ -10,7 +10,6 @@ export const GymClass = sequelize.define(
       autoIncrement: true,
     },
     name: {
-      // Ej: Yoga, Pilates, etc.
       type: DataTypes.STRING,
       allowNull: false,
     },
@@ -21,9 +20,8 @@ export const GymClass = sequelize.define(
     durationMinutes: {
       type: DataTypes.INTEGER,
     },
-    isActive: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: true,
+    imageUrl: {
+      type: DataTypes.STRING,
     },
   },
   { timestamps: false }

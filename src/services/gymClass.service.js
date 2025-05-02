@@ -6,7 +6,7 @@ export const findGymClasses = async (req, res) => {
 };
 
 export const createGymClass = async (req, res) => {
-  const { name, instructor, durationMinutes, isActive } = req.body;
+  const { name, instructor, durationMinutes, imageUrl } = req.body;
 
   // name e instructor son obligatorios
   if (!name || !instructor) {
@@ -20,7 +20,7 @@ export const createGymClass = async (req, res) => {
       name,
       instructor,
       durationMinutes,
-      isActive,
+      imageUrl,
     });
 
     res.send(newClass);
