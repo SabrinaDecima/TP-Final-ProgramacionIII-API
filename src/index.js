@@ -4,6 +4,8 @@ import { PORT } from "./config.js";
 import { sequelize } from "./db.js";
 import gymClassRoutes from "./routes/gymClass.routes.js";
 
+import "./models/GymClass.js";
+
 const app = express();
 
 try {
