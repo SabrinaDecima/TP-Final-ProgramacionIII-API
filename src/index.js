@@ -4,17 +4,17 @@ import { sequelize } from './db.js';
 import gymClassRoutes from './routes/gymClass.routes.js';
 import UserRoutes from './routes/user.routes.js';
 import { Role } from './models/Role.js';
-import './db/associations.js'; // Aquí se cargan las relaciones
 
 // Importar modelos para asegurar que existen antes de sync()
-import './models/Role.js'; // 👈 IMPORTANTE: Asegura que Role exista
+import './models/Role.js';
 import './models/User.js';
+import './models/gymClass.js';
+import './db/associations.js';
 
 const app = express();
 
 try {
-  await sequelize.sync({ force: true }); // 👈 Esto eliminará tablas existentes y las recreará
-  console.log('Tablas sincronizadas');
+  await sequelize.sync({ force: false });
   const defaultRoles = ['superadmin', 'admin', 'socio'];
 
   for (const roleName of defaultRoles) {

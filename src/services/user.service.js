@@ -1,4 +1,5 @@
 import { User } from '../models/User.js';
+import { Role } from '../models/Role.js';
 import jwt from 'jsonwebtoken';
 
 const SECRET_KEY = 'mi_clave_secreta';
@@ -7,7 +8,6 @@ export const registerUser = async (req, res) => {
   const { name, lastname, email, password } = req.body;
 
   try {
-    // Crear usuario con roleId por defecto (ej: 1 = 'user')
     const newUser = await User.create({
       name,
       lastname,
@@ -53,10 +53,8 @@ export const loginUser = async (req, res) => {
 
     // Enviar respuesta con datos del usuario y su rol
     res.json({
-      message: 'Login exitoso',
       accessToken,
       user: {
-        id: user.id,
         name: user.name,
         email: user.email,
         role: user.role.name,
