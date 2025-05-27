@@ -4,10 +4,23 @@ import jwt from 'jsonwebtoken';
 
 const SECRET_KEY = 'mi_clave_secreta';
 
+//Recuperar usuarios
+export const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.findAll();
+
+    res.json(users);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al recuperar los usuarios' });
+  }
+};
+
 export const registerUser = async (req, res) => {
   const { name, lastname, email, password } = req.body;
 
   try {
+    // Crear usuario con roleId por defecto (ej: 1 = 'user')
     const newUser = await User.create({
       name,
       lastname,
@@ -54,11 +67,6 @@ export const loginUser = async (req, res) => {
     // Enviar respuesta con datos del usuario y su rol
     res.json({
       accessToken,
-      user: {
-        name: user.name,
-        email: user.email,
-        role: user.role.name,
-      },
     });
   } catch (error) {
     console.error(error);
