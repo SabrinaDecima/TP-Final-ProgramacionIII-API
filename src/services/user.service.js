@@ -1,22 +1,11 @@
 import { User } from '../models/User.js';
-import { Role } from '../models/Role.js';
 import jwt from 'jsonwebtoken';
+import { Role } from '../models/Role.js';
 
 const SECRET_KEY = 'mi_clave_secreta';
 
-//Recuperar usuarios
-export const getAllUsers = async (req, res) => {
-  try {
-    const users = await User.findAll();
-
-    res.json(users);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Error al recuperar los usuarios' });
-  }
-};
-
 export const registerUser = async (req, res) => {
+  console.log('Request: Po', req);
   const { name, lastname, email, password } = req.body;
 
   try {
@@ -66,10 +55,44 @@ export const loginUser = async (req, res) => {
 
     // Enviar respuesta con datos del usuario y su rol
     res.json({
+      message: 'Login exitoso',
       accessToken,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role.name,
+      },
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Error al iniciar sesión' });
+  }
+};
+
+export const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.findAll();
+    res.json({ users });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al obtener los usuarios' });
+  }
+};
+
+export const updateUserRole = async (req, res) => {
+  const { id } = req.params;
+  const { roleId } = req.body;
+  try {
+    const user = await User.findByPk(id);
+    if (!user) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+    user.roleId = roleId;
+    await user.save();
+    res.json({ message: 'Rol actualizado', user });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al actualizar el rol del usuario' });
   }
 };
