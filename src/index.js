@@ -15,7 +15,7 @@ const app = express();
 
 try {
   await sequelize.sync({ force: false });
-  const defaultRoles = ['superadmin', 'admin', 'socio'];
+  const defaultRoles = ['superadmin', 'admin', 'member'];
 
   for (const roleName of defaultRoles) {
     await Role.findOrCreate({
