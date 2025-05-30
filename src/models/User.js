@@ -1,6 +1,6 @@
 // models/User.js
 import { DataTypes } from 'sequelize';
-import { sequelize } from '../db.js';
+import { sequelize } from '../db/db.js';
 
 export const User = sequelize.define(
   'user',
@@ -26,6 +26,10 @@ export const User = sequelize.define(
     password: {
       type: DataTypes.STRING,
       allowNull: false,
+    },
+    plan: {
+      type: DataTypes.STRING,
+      allowNull: true, // los admin/superadmin no necesitan tener un plan
     },
     roleId: {
       type: DataTypes.INTEGER,

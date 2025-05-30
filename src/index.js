@@ -1,28 +1,24 @@
 import express from 'express';
 import { PORT } from './config.js';
-import { sequelize } from './db.js';
+import { sequelize } from './db/db.js';
 import gymClassRoutes from './routes/gymClass.routes.js';
 import UserRoutes from './routes/user.routes.js';
-import { Role } from './models/Role.js';
+
+import { initializeDefaults } from './db/initDefaults.js';
 
 // Importar modelos para asegurar que existen antes de sync()
 import './models/Role.js';
 import './models/User.js';
-import './models/gymClass.js';
+import './models/GymClass.js';
+import './models/UserGymClass.js';
 import './db/associations.js';
 
 const app = express();
 
 try {
   await sequelize.sync({ force: false });
-  const defaultRoles = ['superadmin', 'admin', 'member'];
+  await initializeDefaults();
 
-  for (const roleName of defaultRoles) {
-    await Role.findOrCreate({
-      where: { name: roleName },
-      defaults: { name: roleName },
-    });
-  }
 
   app.use(express.json());
   app.use((req, res, next) => {
@@ -41,3 +37,4 @@ try {
 } catch (error) {
   console.error('Error during initialization:', error);
 }
+

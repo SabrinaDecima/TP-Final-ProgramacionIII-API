@@ -96,3 +96,30 @@ export const updateUserRole = async (req, res) => {
     res.status(500).json({ error: 'Error al actualizar el rol del usuario' });
   }
 };
+
+export const updateUser = async (req, res) => {
+  const { id } = req.params;
+  const { name, lastname, email, password } = req.body;
+
+  try {
+    const user = await User.findByPk(id);
+
+    if (!user) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    // Actualizar solo los campos que se proporcionen
+    if (name) user.name = name;
+    if (lastname) user.lastname = lastname;
+    if (email) user.email = email;
+    if (password) user.password = password;
+
+    await user.save();
+
+    res.json({ message: 'Usuario actualizado', user });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al actualizar el usuario' });
+  }
+};
+
