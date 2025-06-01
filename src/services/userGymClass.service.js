@@ -12,6 +12,12 @@ export const enrollUserToClass = async (req, res) => {
             return res.status(404).json({ error: 'Usuario o clase no encontrada' });
         }
 
+        // Verifica si el usuario ya está inscrito en la clase
+        const yaInscripto = await user.hasGymClass(gymClass);
+        if (yaInscripto) {
+            return res.status(400).json({ error: 'El usuario ya está inscrito en esta clase' });
+        }
+
         // Asocia usuario con la clase (tabla intermedia)
         await user.addGymClass(gymClass);
 
@@ -21,6 +27,7 @@ export const enrollUserToClass = async (req, res) => {
         res.status(500).json({ error: 'Error al inscribir a la clase' });
     }
 };
+
 
 export const getUserClasses = async (req, res) => {
     const { userId } = req.params;
