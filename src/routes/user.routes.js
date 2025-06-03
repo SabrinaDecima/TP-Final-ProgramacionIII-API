@@ -4,7 +4,9 @@ import {
   registerUser,
   getAllUsers,
   updateUserRole,
-  updateUser
+  updateUser,
+  pagarCuota,
+  getCuotasImpagas
 } from '../services/user.service.js';
 
 import { enrollUserToClass, getUserClasses } from '../services/userGymClass.service.js'
@@ -22,5 +24,9 @@ router.post('/users/:userId/classes/:classId', enrollUserToClass);
 
 // Obtener clases de un usuario
 router.get('/users/:userId/classes', getUserClasses);
+
+router.put('/cuotas/pagar', pagarCuota);
+router.get('/users/:userId/cuotas/impagas', getCuotasImpagas);
+
 
 export default router;

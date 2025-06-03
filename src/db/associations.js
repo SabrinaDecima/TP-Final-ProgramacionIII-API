@@ -3,6 +3,7 @@ import { User } from '../models/User.js';
 import { Role } from '../models/Role.js';
 import { GymClass } from '../models/GymClass.js';
 import { UserGymClass } from '../models/UserGymClass.js';
+import { Cuota } from '../models/Cuota.js';
 
 // Relación 1:N - User → Role
 User.belongsTo(Role, {
@@ -23,4 +24,14 @@ GymClass.belongsToMany(User, {
   foreignKey: 'gymClassId',
   otherKey: 'userId',
   as: 'users',
+});
+
+User.hasMany(Cuota, {
+  foreignKey: 'userId',
+  as: 'cuotas',
+});
+
+Cuota.belongsTo(User, {
+  foreignKey: 'userId',
+  as: 'user',
 });
