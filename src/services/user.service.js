@@ -6,10 +6,24 @@ import { Cuota } from '../models/Cuota.js';
 const SECRET_KEY = 'mi_clave_secreta';
 
 export const registerUser = async (req, res) => {
-  const { name, lastname, email, password } = req.body;
+  const { name, lastname, email, password, telNumber, plan, roleId } = req.body;
+
+  // Validaciones mínimas
+  if (!name || !lastname || !email || !password || !telNumber) {
+    return res.status(400).json({ error: 'Faltan campos obligatorios' });
+  }
 
   try {
-    const newUser = await User.create({ name, lastname, email, password });
+    // Crear usuario
+    const newUser = await User.create({
+      name,
+      lastname,
+      email,
+      password,
+      telNumber,
+      plan: plan || null,
+      roleId: roleId || 3, // valor por defecto: 'member'
+    });
 
     // Crear cuotas predeterminadas (ej: meses 1 a 12, monto fijo 5000)
     const cuotas = [];

@@ -23,6 +23,10 @@ export const User = sequelize.define(
       allowNull: false,
       unique: true,
     },
+    telNumber: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
     password: {
       type: DataTypes.STRING,
       allowNull: false,

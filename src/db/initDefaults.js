@@ -16,19 +16,15 @@ export async function initializeDefaults() {
     const adminRole = await Role.findOne({ where: { name: 'admin' } });
     const memberRole = await Role.findOne({ where: { name: 'member' } });
 
-    console.log('Roles cargados:', {
-        superadminRoleId: superadminRole.id,
-        adminRoleId: adminRole.id,
-        memberRoleId: memberRole.id,
-    });
-
-    // Usuarios por defecto
+    // Usuarios por defecto (agregado telNumber obligatorio y plan opcional)
     const defaultUsers = [
         {
             name: 'martin',
             lastname: 'f',
             email: 'martin@gmail.com',
             password: '123',
+            telNumber: '1111111111',
+            plan: null,
             roleId: superadminRole.id,
         },
         {
@@ -36,6 +32,8 @@ export async function initializeDefaults() {
             lastname: 'd',
             email: 'sabrina@gmail.com',
             password: '123',
+            telNumber: '2222222222',
+            plan: null,
             roleId: superadminRole.id,
         },
         {
@@ -43,6 +41,8 @@ export async function initializeDefaults() {
             lastname: 'c',
             email: 'francisco@gmail.com',
             password: '123',
+            telNumber: '3333333333',
+            plan: null,
             roleId: superadminRole.id,
         },
         {
@@ -50,6 +50,8 @@ export async function initializeDefaults() {
             lastname: 'admin',
             email: 'admin@gmail.com',
             password: '123',
+            telNumber: '4444444444',
+            plan: null,
             roleId: adminRole.id,
         },
         {
@@ -57,8 +59,10 @@ export async function initializeDefaults() {
             lastname: 'member',
             email: 'member@gmail.com',
             password: '123',
+            telNumber: '5555555555',
+            plan: 'basic',
             roleId: memberRole.id,
-        }
+        },
     ];
 
     for (const userData of defaultUsers) {
