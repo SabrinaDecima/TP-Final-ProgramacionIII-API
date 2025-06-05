@@ -25,10 +25,15 @@ export const registerUser = async (req, res) => {
       roleId: roleId || 3, // valor por defecto: 'member'
     });
 
-    // Crear cuotas predeterminadas (ej: meses 1 a 12, monto fijo 50000)
+    // Crear cuotas predeterminadas (ej: meses 1 a 12)
     const cuotas = [];
     for (let month = 1; month <= 12; month++) {
-      cuotas.push({ userId: newUser.id, month, amount: 50000, paid: false });
+      cuotas.push({
+        userId: newUser.id,
+        month,
+        amount: 50000,
+        paid: month === 1 ? true : false, // 👈 Primer mes pagado
+      });
     }
     await Cuota.bulkCreate(cuotas);
 
@@ -168,19 +173,60 @@ export const pagarCuota = async (req, res) => {
   }
 };
 
-
 export const getCuotasImpagas = async (req, res) => {
   const { userId } = req.params;
 
   try {
-    const cuotas = await Cuota.findAll({
-      where: {
-        userId,
-        paid: false,
+    // Obtener usuario con TODAS sus cuotas (no solo impagas)
+    const user = await User.findByPk(userId, {
+      attributes: ['id', 'name', 'lastname', 'email'],
+      include: {
+        model: Cuota,
+        as: 'cuotas',
+        attributes: ['month', 'paid'], // Solo necesitamos month y paid
+        order: [['month', 'ASC']],
       },
     });
 
-    res.json({ cuotas });
+    if (!user) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    // Mapear cuotas por mes para acceso rápido
+    const cuotasMap = {};
+    user.cuotas.forEach(cuota => {
+      cuotasMap[cuota.month] = cuota;
+    });
+
+    // Generar lista detallada de cada mes
+    const detalleMeses = [];
+
+    for (let mes = 1; mes <= 12; mes++) {
+      const cuota = cuotasMap[mes];
+
+      detalleMeses.push({
+        mes,
+        estado: cuota ? (cuota.paid ? 'paga' : 'impaga') : 'impaga',
+      });
+    }
+
+    // Contadores
+    const totalPagadas = detalleMeses.filter(m => m.estado === 'paga').length;
+    const totalImpagas = 12 - totalPagadas;
+
+    res.json({
+      usuario: {
+        id: user.id,
+        nombre: `${user.name} ${user.lastname}`,
+        email: user.email,
+      },
+      detalle_meses: detalleMeses,
+      resumen: {
+        total_pagadas: totalPagadas,
+        total_impagas: totalImpagas,
+      },
+    });
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Error al obtener cuotas impagas' });
