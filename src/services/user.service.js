@@ -25,10 +25,10 @@ export const registerUser = async (req, res) => {
       roleId: roleId || 3, // valor por defecto: 'member'
     });
 
-    // Crear cuotas predeterminadas (ej: meses 1 a 12, monto fijo 5000)
+    // Crear cuotas predeterminadas (ej: meses 1 a 12, monto fijo 50000)
     const cuotas = [];
     for (let month = 1; month <= 12; month++) {
-      cuotas.push({ userId: newUser.id, month, amount: 5000, paid: false });
+      cuotas.push({ userId: newUser.id, month, amount: 50000, paid: false });
     }
     await Cuota.bulkCreate(cuotas);
 

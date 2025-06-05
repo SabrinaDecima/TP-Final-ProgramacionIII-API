@@ -1,6 +1,7 @@
 import { Role } from '../models/Role.js';
 import { User } from '../models/User.js';
 import { Cuota } from '../models/Cuota.js';  // <-- Importar Cuota
+import { GymClass } from '../models/GymClass.js';
 
 export async function initializeDefaults() {
     const defaultRoles = ['superadmin', 'admin', 'member'];
@@ -19,8 +20,8 @@ export async function initializeDefaults() {
     // Usuarios por defecto (agregado telNumber obligatorio y plan opcional)
     const defaultUsers = [
         {
-            name: 'martin',
-            lastname: 'f',
+            name: 'Martin',
+            lastname: 'Flecha',
             email: 'martin@gmail.com',
             password: '123',
             telNumber: '1111111111',
@@ -28,8 +29,8 @@ export async function initializeDefaults() {
             roleId: superadminRole.id,
         },
         {
-            name: 'sabrina',
-            lastname: 'd',
+            name: 'Sabrina',
+            lastname: 'Decima',
             email: 'sabrina@gmail.com',
             password: '123',
             telNumber: '2222222222',
@@ -37,8 +38,8 @@ export async function initializeDefaults() {
             roleId: superadminRole.id,
         },
         {
-            name: 'francisco',
-            lastname: 'c',
+            name: 'Francisco',
+            lastname: 'Cumini Londero',
             email: 'francisco@gmail.com',
             password: '123',
             telNumber: '3333333333',
@@ -65,6 +66,16 @@ export async function initializeDefaults() {
         },
     ];
 
+    await GymClass.findOrCreate({
+        where: { name: 'boxeo' },
+        defaults: {
+            name: 'Boxeo',
+            instructor: 'Juan Perez',
+            durationMinutes: 60,
+            imageUrl: 'https://placehold.co/400',
+        },
+    });
+
     for (const userData of defaultUsers) {
         const [user, created] = await User.findOrCreate({
             where: { email: userData.email },
@@ -80,7 +91,7 @@ export async function initializeDefaults() {
 
             const cuotas = [];
             for (let month = 1; month <= 12; month++) {
-                cuotas.push({ userId: user.id, month, amount: 5000, paid: false });
+                cuotas.push({ userId: user.id, month, amount: 50000, paid: false });
             }
 
             try {
