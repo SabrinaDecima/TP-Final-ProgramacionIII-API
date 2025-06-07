@@ -69,7 +69,7 @@ export async function initializeDefaults() {
     await GymClass.findOrCreate({
         where: { name: 'boxeo' },
         defaults: {
-            name: 'Boxeo',
+            name: 'boxeo',
             instructor: 'Juan Perez',
             durationMinutes: 60,
             imageUrl: 'https://placehold.co/400',
@@ -87,19 +87,21 @@ export async function initializeDefaults() {
         console.log(`Usuario: ${user.email}, created: ${created}, roleId: ${user.roleId} (memberRole.id: ${memberRole.id})`);
 
         if (created && user.roleId === memberRole.id) {
-            console.log(`Creando cuotas para usuario ${user.email}`);
-
-            const cuotas = [];
-            for (let month = 1; month <= 12; month++) {
-                cuotas.push({ userId: user.id, month, amount: 50000, paid: false });
-            }
+            const currentMonth = new Date().getMonth() + 1;
 
             try {
-                await Cuota.bulkCreate(cuotas);
-                console.log(`Cuotas creadas para ${user.email}`);
+                await Cuota.create({
+                    userId: user.id,
+                    month: currentMonth,
+                    amount: 50000,
+                    paid: true,
+                });
+
+                console.log(`Primera cuota pagada creada para ${user.email} (mes ${currentMonth})`);
             } catch (error) {
-                console.error(`Error creando cuotas para ${user.email}:`, error);
+                console.error(`Error creando cuota para ${user.email}:`, error);
             }
         }
+
     }
 }

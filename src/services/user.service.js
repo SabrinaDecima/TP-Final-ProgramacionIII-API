@@ -8,13 +8,12 @@ const SECRET_KEY = 'mi_clave_secreta';
 export const registerUser = async (req, res) => {
   const { name, lastname, email, password, telNumber, plan, roleId } = req.body;
 
-  // Validaciones mínimas
   if (!name || !lastname || !email || !password || !telNumber) {
     return res.status(400).json({ error: 'Faltan campos obligatorios' });
   }
 
   try {
-    // Crear usuario
+    // Crear usuario con rol por defecto 'member' si no se pasa otro
     const newUser = await User.create({
       name,
       lastname,
@@ -22,27 +21,32 @@ export const registerUser = async (req, res) => {
       password,
       telNumber,
       plan: plan || null,
-      roleId: roleId || 3, // valor por defecto: 'member'
+      roleId: roleId || 3,
     });
 
-    // Crear cuotas predeterminadas (ej: meses 1 a 12)
-    const cuotas = [];
-    for (let month = 1; month <= 12; month++) {
-      cuotas.push({
+    // Si el rol es 'member' (id = 3), crear solo UNA cuota paga del mes actual
+    if (newUser.roleId === 3) {
+      const currentMonth = new Date().getMonth() + 1;
+
+      await Cuota.create({
         userId: newUser.id,
-        month,
+        month: currentMonth,
         amount: 50000,
-        paid: month === 1 ? true : false, // 👈 Primer mes pagado
+        paid: true,
       });
     }
-    await Cuota.bulkCreate(cuotas);
 
-    res.status(201).json({ message: 'Usuario creado con cuotas generadas', user: newUser });
+    res.status(201).json({
+      message: 'Usuario creado correctamente',
+      user: newUser,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Error al crear el usuario' });
   }
 };
+
+
 
 // Inicio de sesión
 export const loginUser = async (req, res) => {
@@ -151,12 +155,17 @@ export const pagarCuota = async (req, res) => {
   }
 
   try {
-    const cuota = await Cuota.findOne({
-      where: { userId, month }
-    });
+    let cuota = await Cuota.findOne({ where: { userId, month } });
 
     if (!cuota) {
-      return res.status(404).json({ error: 'Cuota no encontrada para ese mes y usuario' });
+      // Crear cuota nueva para ese mes, y marcarla como pagada
+      cuota = await Cuota.create({
+        userId,
+        month,
+        amount: 50000, // o el monto que corresponda
+        paid: true,
+      });
+      return res.json({ message: 'Cuota creada y pagada exitosamente', cuota });
     }
 
     if (cuota.paid) {
@@ -173,18 +182,17 @@ export const pagarCuota = async (req, res) => {
   }
 };
 
+
 export const getCuotasImpagas = async (req, res) => {
   const { userId } = req.params;
 
   try {
-    // Obtener usuario con TODAS sus cuotas (no solo impagas)
     const user = await User.findByPk(userId, {
       attributes: ['id', 'name', 'lastname', 'email'],
       include: {
         model: Cuota,
         as: 'cuotas',
-        attributes: ['month', 'paid'], // Solo necesitamos month y paid
-        order: [['month', 'ASC']],
+        attributes: ['month', 'paid'],
       },
     });
 
@@ -192,27 +200,34 @@ export const getCuotasImpagas = async (req, res) => {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
 
-    // Mapear cuotas por mes para acceso rápido
     const cuotasMap = {};
     user.cuotas.forEach(cuota => {
       cuotasMap[cuota.month] = cuota;
     });
 
-    // Generar lista detallada de cada mes
+    const currentMonth = new Date().getMonth() + 1;
     const detalleMeses = [];
 
     for (let mes = 1; mes <= 12; mes++) {
       const cuota = cuotasMap[mes];
 
+      let estado;
+
+      if (cuota) {
+        estado = cuota.paid ? 'paga' : 'impaga';
+      } else {
+        estado = mes < currentMonth ? 'no generada' : 'impaga';
+      }
+
       detalleMeses.push({
         mes,
-        estado: cuota ? (cuota.paid ? 'paga' : 'impaga') : 'impaga',
+        estado,
       });
     }
 
-    // Contadores
     const totalPagadas = detalleMeses.filter(m => m.estado === 'paga').length;
-    const totalImpagas = 12 - totalPagadas;
+    const totalImpagas = detalleMeses.filter(m => m.estado === 'impaga').length;
+    const cuotasNoGeneradas = detalleMeses.filter(m => m.estado === 'no generada').length;
 
     res.json({
       usuario: {
@@ -224,6 +239,7 @@ export const getCuotasImpagas = async (req, res) => {
       resumen: {
         total_pagadas: totalPagadas,
         total_impagas: totalImpagas,
+        cuotas_no_generadas: cuotasNoGeneradas,
       },
     });
 
@@ -232,6 +248,8 @@ export const getCuotasImpagas = async (req, res) => {
     res.status(500).json({ error: 'Error al obtener cuotas impagas' });
   }
 };
+
+
 
 
 
