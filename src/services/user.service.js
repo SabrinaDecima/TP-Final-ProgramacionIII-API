@@ -2,6 +2,8 @@ import { User } from '../models/User.js';
 import jwt from 'jsonwebtoken';
 import { Role } from '../models/Role.js';
 import { Cuota } from '../models/Cuota.js';
+import { UserGymClass } from '../models/UserGymClass.js';
+import { sequelize } from '../db/db.js';
 
 const SECRET_KEY = 'mi_clave_secreta';
 
@@ -13,7 +15,6 @@ export const registerUser = async (req, res) => {
   }
 
   try {
-    // Crear usuario con rol por defecto 'member' si no se pasa otro
     const newUser = await User.create({
       name,
       lastname,
@@ -24,7 +25,6 @@ export const registerUser = async (req, res) => {
       roleId: roleId || 3,
     });
 
-    // Si el rol es 'member' (id = 3), crear solo UNA cuota paga del mes actual
     if (newUser.roleId === 3) {
       const currentMonth = new Date().getMonth() + 1;
 
@@ -46,14 +46,10 @@ export const registerUser = async (req, res) => {
   }
 };
 
-
-
-// Inicio de sesión
 export const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // Buscar usuario con su rol asociado
     const user = await User.findOne({
       where: { email },
       include: { model: Role, as: 'role' },
@@ -77,7 +73,6 @@ export const loginUser = async (req, res) => {
       { expiresIn: '1h' }
     );
 
-    // Enviar respuesta con datos del usuario y su rol
     res.json({
       message: 'Login exitoso',
       accessToken,
@@ -123,7 +118,7 @@ export const updateUserRole = async (req, res) => {
 
 export const updateUser = async (req, res) => {
   const { id } = req.params;
-  const { name, lastname, email, password } = req.body;
+  const { name, lastname, email, password, telNumber, plan } = req.body;
 
   try {
     const user = await User.findByPk(id);
@@ -132,11 +127,12 @@ export const updateUser = async (req, res) => {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
 
-    // Actualizar solo los campos que se proporcionen
     if (name) user.name = name;
     if (lastname) user.lastname = lastname;
     if (email) user.email = email;
     if (password) user.password = password;
+    if (telNumber) user.telNumber = telNumber;
+    if (plan) user.plan = plan;
 
     await user.save();
 
@@ -158,11 +154,10 @@ export const pagarCuota = async (req, res) => {
     let cuota = await Cuota.findOne({ where: { userId, month } });
 
     if (!cuota) {
-      // Crear cuota nueva para ese mes, y marcarla como pagada
       cuota = await Cuota.create({
         userId,
         month,
-        amount: 50000, // o el monto que corresponda
+        amount: 50000,
         paid: true,
       });
       return res.json({ message: 'Cuota creada y pagada exitosamente', cuota });
@@ -181,7 +176,6 @@ export const pagarCuota = async (req, res) => {
     res.status(500).json({ error: 'Error al pagar la cuota' });
   }
 };
-
 
 export const getCuotasImpagas = async (req, res) => {
   const { userId } = req.params;
@@ -242,15 +236,87 @@ export const getCuotasImpagas = async (req, res) => {
         cuotas_no_generadas: cuotasNoGeneradas,
       },
     });
-
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Error al obtener cuotas impagas' });
   }
 };
 
+export const deleteUserClass = async (req, res) => {
+  const { userId, classId } = req.params;
 
+  try {
+    const userGymClass = await UserGymClass.findOne({
+      where: {
+        userId: userId,
+        gymClassId: classId,
+      },
+    });
 
+    if (!userGymClass) {
+      return res.status(404).json({ error: 'Inscripción no encontrada' });
+    }
 
+    await userGymClass.destroy();
 
+    res.status(200).json({ message: 'Desinscripción exitosa' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al desinscribirse de la clase' });
+  }
+};
+
+export const getSuperAdminOverview = async (req, res) => {
+  try {
+    // sqlite_sequence solo si usás SQLite, si no, comentar esta línea o detectar motor.
+    let sqliteSequence = null;
+    if (sequelize.getDialect() === 'sqlite') {
+      [sqliteSequence] = await sequelize.query('SELECT * FROM sqlite_sequence');
+    }
+
+    const totalUsers = await User.count();
+
+    // Contar usuarios por rol con group by sin include para evitar problemas
+    const usersByRoleRaw = await User.findAll({
+      attributes: ['roleId', [sequelize.fn('COUNT', sequelize.col('id')), 'cantidad']],
+      group: ['roleId'],
+      raw: true,
+    });
+
+    // Obtener todos los roles
+    const allRoles = await Role.findAll({ attributes: ['id', 'name'], raw: true });
+
+    // Mapear roleId a nombre y cantidad
+    const usuariosPorRol = allRoles.map(role => {
+      const found = usersByRoleRaw.find(u => u.roleId === role.id);
+      return {
+        role: role.name,
+        cantidad: found ? parseInt(found.cantidad) : 0,
+      };
+    });
+
+    // Mejor contar cuotas pagadas y no pagadas con counts separados
+    const pagadas = await Cuota.count({ where: { paid: true } });
+    const impagas = await Cuota.count({ where: { paid: false } });
+
+    const totalInscripciones = await UserGymClass.count();
+
+    res.json({
+      message: 'Resumen SuperAdmin',
+      sqliteSequence,
+      resumen: {
+        totalUsuarios: totalUsers,
+        usuariosPorRol,
+        cuotas: {
+          pagadas,
+          impagas,
+        },
+        totalInscripciones,
+      },
+    });
+  } catch (error) {
+    console.error('Error en overview SuperAdmin:', error);
+    res.status(500).json({ error: 'Error al generar resumen SuperAdmin' });
+  }
+};
 

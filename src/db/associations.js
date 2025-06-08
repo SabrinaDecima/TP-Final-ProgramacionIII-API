@@ -1,17 +1,22 @@
-// relaciones.js (o como se llame tu archivo de asociaciones)
 import { User } from '../models/User.js';
 import { Role } from '../models/Role.js';
 import { GymClass } from '../models/GymClass.js';
 import { UserGymClass } from '../models/UserGymClass.js';
 import { Cuota } from '../models/Cuota.js';
 
-// Relación 1:N - User → Role
+// ✅ Esta línea es la que te falta:
+Role.hasMany(User, {
+  foreignKey: 'roleId',
+  as: 'users',
+});
+
+// User → Role (N:1)
 User.belongsTo(Role, {
   foreignKey: 'roleId',
   as: 'role',
 });
 
-// Relación N:M - User ↔ GymClass
+// User ↔ GymClass (N:M)
 User.belongsToMany(GymClass, {
   through: UserGymClass,
   foreignKey: 'userId',
@@ -26,6 +31,7 @@ GymClass.belongsToMany(User, {
   as: 'users',
 });
 
+// User → Cuota (1:N)
 User.hasMany(Cuota, {
   foreignKey: 'userId',
   as: 'cuotas',

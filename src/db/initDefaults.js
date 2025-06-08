@@ -1,6 +1,6 @@
 import { Role } from '../models/Role.js';
 import { User } from '../models/User.js';
-import { Cuota } from '../models/Cuota.js';  // <-- Importar Cuota
+import { Cuota } from '../models/Cuota.js';
 import { GymClass } from '../models/GymClass.js';
 
 export async function initializeDefaults() {
@@ -17,7 +17,6 @@ export async function initializeDefaults() {
     const adminRole = await Role.findOne({ where: { name: 'admin' } });
     const memberRole = await Role.findOne({ where: { name: 'member' } });
 
-    // Usuarios por defecto (agregado telNumber obligatorio y plan opcional)
     const defaultUsers = [
         {
             name: 'Martin',
@@ -64,17 +63,68 @@ export async function initializeDefaults() {
             plan: 'basic',
             roleId: memberRole.id,
         },
+        {
+            name: 'Lucía',
+            lastname: 'Gómez',
+            email: 'lucia@gmail.com',
+            password: '123',
+            telNumber: '6666666666',
+            plan: 'premium',
+            roleId: memberRole.id,
+        },
+        {
+            name: 'Juan',
+            lastname: 'Torres',
+            email: 'juan@gmail.com',
+            password: '123',
+            telNumber: '7777777777',
+            plan: 'basic',
+            roleId: memberRole.id,
+        },
+        {
+            name: 'Ana',
+            lastname: 'Martínez',
+            email: 'ana@gmail.com',
+            password: '123',
+            telNumber: '8888888888',
+            plan: 'basic',
+            roleId: memberRole.id,
+        }
     ];
 
-    await GymClass.findOrCreate({
-        where: { name: 'boxeo' },
-        defaults: {
+    const defaultGymClasses = [
+        {
             name: 'boxeo',
             instructor: 'Juan Perez',
             durationMinutes: 60,
-            imageUrl: 'https://placehold.co/400',
+            imageUrl: 'https://entrenaenbarcelona.com/wp-content/uploads/2023/12/6A7A1305-scaled.jpg',
         },
-    });
+        {
+            name: 'funcional',
+            instructor: 'Lucía Fernández',
+            durationMinutes: 45,
+            imageUrl: 'https://i.blogs.es/3ef119/entrenamiento-funcional/1366_2000.webp',
+        },
+        {
+            name: 'zumba',
+            instructor: 'Carlos Méndez',
+            durationMinutes: 50,
+            imageUrl: 'https://www.verywellfit.com/thmb/5g7mfKihpixyGsPXHh8AojylmWs=/750x0/filters:no_upscale():max_bytes(150000):strip_icc():format(webp)/4688722-GettyImages-950806258-06e1e050ab184f3694fd96017c9a42ee.jpg',
+        },
+        {
+            name: 'yoga',
+            instructor: 'María López',
+            durationMinutes: 60,
+            imageUrl: 'https://nutritionsource.hsph.harvard.edu/wp-content/uploads/2021/11/pexels-yan-krukov-8436601-copy-768x576.jpg',
+        },
+    ];
+
+    for (const gymClassData of defaultGymClasses) {
+        await GymClass.findOrCreate({
+            where: { name: gymClassData.name },
+            defaults: gymClassData,
+        });
+    }
 
     for (const userData of defaultUsers) {
         const [user, created] = await User.findOrCreate({
@@ -102,6 +152,5 @@ export async function initializeDefaults() {
                 console.error(`Error creando cuota para ${user.email}:`, error);
             }
         }
-
     }
 }
