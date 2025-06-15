@@ -8,19 +8,20 @@ import {
   updateGymClass,
   getUsersByClass
 } from "../services/gymClass.service.js";
+import { verifyToken } from "../utils/auth.js";
 
 const router = Router();
 
-router.get("/clases", findGymClasses);
+router.get("/clases", verifyToken, findGymClasses);
 
-router.get("/clases/:id", findGymClass);
+router.get("/clases/:id", verifyToken, findGymClass);
 
-router.post("/clases", createGymClass);
+router.post("/clases", verifyToken, createGymClass);
 
-router.put("/clases/:id", updateGymClass);
+router.put("/clases/:id", verifyToken, updateGymClass);
 
-router.delete("/clases/:id", deleteGymClass);
+router.delete("/clases/:id", verifyToken, deleteGymClass);
 
-router.get('/clases/:id/users', getUsersByClass);
+router.get('/clases/:id/users', verifyToken, getUsersByClass);
 
 export default router;

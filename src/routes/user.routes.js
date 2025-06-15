@@ -12,28 +12,29 @@ import {
 } from '../services/user.service.js';
 
 import { enrollUserToClass, getUserClasses } from '../services/userGymClass.service.js'
+import { verifyToken } from '../utils/auth.js';
 
 const router = express.Router();
 
 router.post('/register', registerUser);
 router.post('/login', loginUser);
-router.get('/users', getAllUsers);
-router.put('/users/:id/role', updateUserRole);
-router.put('/users/:id', updateUser);
+router.get('/users', verifyToken, getAllUsers);
+router.put('/users/:id/role', verifyToken, updateUserRole);
+router.put('/users/:id', verifyToken, updateUser);
 
 
 
-router.post('/users/:userId/classes/:classId', enrollUserToClass);
+router.post('/users/:userId/classes/:classId', verifyToken, enrollUserToClass);
 
 // Obtener clases de un usuario
-router.get('/users/:userId/classes', getUserClasses);
+router.get('/users/:userId/classes', verifyToken, getUserClasses);
 
-router.put('/cuotas/pagar', pagarCuota);
-router.get('/users/:userId/cuotas/impagas', getCuotasImpagas);
+router.put('/cuotas/pagar', verifyToken, pagarCuota);
+router.get('/users/:userId/cuotas/impagas', verifyToken, getCuotasImpagas);
 
-router.delete('/users/:userId/classes/:classId', deleteUserClass);
+router.delete('/users/:userId/classes/:classId', verifyToken, deleteUserClass);
 
-router.get('/superadmin/overview', getSuperAdminOverview);
+router.get('/superadmin/overview', verifyToken, getSuperAdminOverview);
 
 
 export default router;

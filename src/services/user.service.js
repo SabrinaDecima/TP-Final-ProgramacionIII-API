@@ -5,7 +5,6 @@ import { Cuota } from '../models/Cuota.js';
 import { UserGymClass } from '../models/UserGymClass.js';
 import { sequelize } from '../db/db.js';
 
-const SECRET_KEY = 'mi_clave_secreta';
 
 export const registerUser = async (req, res) => {
   const { name, lastname, email, password, telNumber, plan, roleId } = req.body;
@@ -63,13 +62,14 @@ export const loginUser = async (req, res) => {
       return res.status(400).json({ error: 'Contraseña incorrecta' });
     }
 
+    const secretKey = 'secret';
     const accessToken = jwt.sign(
       {
         id: user.id,
         email: user.email,
         role: user.role.name,
       },
-      SECRET_KEY,
+      secretKey,
       { expiresIn: '1h' }
     );
 
