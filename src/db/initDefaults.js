@@ -97,7 +97,7 @@ export async function initializeDefaults() {
             name: 'boxeo',
             instructor: 'Juan Perez',
             durationMinutes: 60,
-            imageUrl: 'https://entrenaenbarcelona.com/wp-content/uploads/2023/12/6A7A1305-scaled.jpg',
+            imageUrl: 'https://hips.hearstapps.com/hmg-prod/images/fw17-brand-combat-046-1511772607.jpg',
         },
         {
             name: 'funcional',
