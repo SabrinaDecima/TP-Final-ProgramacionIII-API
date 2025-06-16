@@ -13,6 +13,7 @@ import {
 
 import { enrollUserToClass, getUserClasses } from '../services/userGymClass.service.js'
 import { verifyToken } from '../utils/auth.js';
+import { authorize } from '../middlewares/authorize.js'
 
 const router = express.Router();
 
@@ -34,7 +35,7 @@ router.get('/users/:userId/cuotas/impagas', verifyToken, getCuotasImpagas);
 
 router.delete('/users/:userId/classes/:classId', verifyToken, deleteUserClass);
 
-router.get('/superadmin/overview', verifyToken, getSuperAdminOverview);
+router.get('/superadmin/overview', verifyToken, authorize('superadmin'), getSuperAdminOverview);
 
 
 export default router;
