@@ -20,7 +20,7 @@ const router = express.Router();
 router.post('/register', registerUser);
 router.post('/login', loginUser);
 router.get('/users', verifyToken, getAllUsers);
-router.put('/users/:id/role', verifyToken, updateUserRole);
+router.put('/users/:id/role', verifyToken, authorize('superadmin'), updateUserRole);
 router.put('/users/:id', verifyToken, updateUser);
 
 
