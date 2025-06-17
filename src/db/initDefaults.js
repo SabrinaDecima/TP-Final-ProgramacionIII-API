@@ -117,6 +117,18 @@ export async function initializeDefaults() {
             durationMinutes: 60,
             imageUrl: 'https://nutritionsource.hsph.harvard.edu/wp-content/uploads/2021/11/pexels-yan-krukov-8436601-copy-768x576.jpg',
         },
+        {
+            name: 'pilates',
+            instructor: 'Ana Torres',
+            durationMinutes: 55,
+            imageUrl: 'https://resizer.glanacion.com/resizer/v2/el-pilates-esta-viviendo-un-boom-como-nunca-antes-AVSJVA2NIJHHRNGMYUJF6BVEII.JPG?auth=212dcbfe2565f1b15836f2805d3e4968150fbaca1ac7b44af1a2a1fc188b2184&width=1280&height=854&quality=70&smart=true',
+        },
+        {
+            name: 'crossfit',
+            instructor: 'Pedro Sánchez',
+            durationMinutes: 60,
+            imageUrl: 'https://www.boldtribe.com/cdn/shop/articles/4_Consejos_Imprescindibles_Para_Llegar_A_Los_CrossFit_Open_1025x.jpg?v=1517682448',
+        }
     ];
 
     for (const gymClassData of defaultGymClasses) {
