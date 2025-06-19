@@ -9,6 +9,7 @@ import {
   getCuotasImpagas,
   deleteUserClass,
   getSuperAdminOverview,
+  deleteUser,
 } from '../services/user.service.js';
 
 import { enrollUserToClass, getUserClasses } from '../services/userGymClass.service.js'
@@ -22,8 +23,7 @@ router.post('/login', loginUser);
 router.get('/users', verifyToken, getAllUsers);
 router.put('/users/:id/role', verifyToken, authorize('superadmin'), updateUserRole);
 router.put('/users/:id', verifyToken, updateUser);
-
-
+router.delete('/users/:id', verifyToken, deleteUser);
 
 router.post('/users/:userId/classes/:classId', verifyToken, enrollUserToClass);
 
